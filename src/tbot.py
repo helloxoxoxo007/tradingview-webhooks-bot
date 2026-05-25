@@ -97,6 +97,11 @@ def get_tbot():
 def get_ngrok():
     """Get NGROK Address"""
     addr = os.environ.get("TBOT_NGROK", "#")
+    if addr and addr != "#":
+        from urllib.parse import urlparse
+        parsed = urlparse(addr)
+        host_ip = request.host.split(":")[0]
+        addr = f"{parsed.scheme}://{host_ip}:{parsed.port}"
     return {"data": {"address": addr}}
 
 
