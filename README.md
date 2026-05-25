@@ -1,5 +1,5 @@
 ## Customized TradingView Webhooks Bot for Educational Materials
-
+ 
 This repository is a customized version of [robswc/tradingview-webhooks-bot](https://github.com/robswc/tradingview-webhooks-bot), forked to meet specific requirements for educational materials.
 
 
