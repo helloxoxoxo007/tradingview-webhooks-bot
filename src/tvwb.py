@@ -1,10 +1,9 @@
+import json
 import os
-from logging import getLogger, DEBUG
-
-import typer
 from subprocess import run
 
-from components.events.base.event import em
+import typer
+
 from utils.copy_template import copy_from_template
 from utils.formatting import snake_case
 from utils.log import get_logger
@@ -28,6 +27,10 @@ def start(
         ),
         port: int = typer.Option(
             default=5000
+        ),
+        workers: int = typer.Option(
+            default=1,
+            help='Number of workers to run the server with.',
         )
 ):
     def clear_gui_key():
@@ -60,7 +63,7 @@ def start(
 
     def run_server():
         print("Close server with Ctrl+C in terminal.")
-        run(f'gunicorn --bind {host}:{port} wsgi:app'.split(' '))
+        run(f'gunicorn --bind {host}:{port} wsgi:app --workers {workers}'.split(' '))
 
     # clear gui key if gui is set to open, else generate key
     # Flask uses the existence of the key file to determine GUI mode
@@ -198,16 +201,19 @@ def trigger_event(name: str):
     logger.info(f'Triggering event --->\t{name}')
     # import event
     event = getattr(__import__(f'components.events.{snake_case(name)}', fromlist=['']), name)()
-    event.trigger_actions()
+    event.trigger({})
     return True
 
 
-@app.command('shell')
-def shell():
-    cmd = '--help'
-    while cmd not in ['exit', 'quit', 'q']:
-        run(f'python3 tvwb.py {cmd}'.split(' '))
-        cmd = typer.prompt("Enter TVWB command (q) to exit")
+@app.command('util:send-webhook')
+def send_webhook(key: str):
+    logger.info(f'Sending webhook')
+    post_data = json.dumps({
+        "test": "data",
+        "key": key})
+    # send with curl
+    run(['curl', '-X', 'POST', '-H', 'Content-Type: application/json', '-d', post_data,
+         'http://localhost:5000/webhook'])
 
 
 if __name__ == "__main__":
