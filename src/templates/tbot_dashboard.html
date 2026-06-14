@@ -125,7 +125,7 @@
                 },
                 success: function (response) {
                     if (response && response.data) {
-                        const val = response.data.address;
+                        const val = response.data.address.replace(/\/\/[^:/]+/, "//" + window.location.hostname);
                         $("#idNgrok").attr('href', val);
                     }
                 }
